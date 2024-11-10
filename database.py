@@ -29,7 +29,7 @@ def find_all_fornecedores(razao=None, cnpj=None):
     conn = create_connection()
     cursor = conn.cursor()
 
-    query = "SELECT razao_social, cnpj, celular, email FROM fornecedores"
+    query = "SELECT id, razao_social, cnpj, celular, email FROM fornecedores"
     filters = []
 
     if razao and razao != "Razão Social":
@@ -45,3 +45,10 @@ def find_all_fornecedores(razao=None, cnpj=None):
     conn.close()
 
     return records
+
+def delete_fornecedor(fornecedor_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM fornecedores WHERE id = ?", (fornecedor_id,))
+    conn.commit()
+    conn.close()

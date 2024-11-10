@@ -133,18 +133,30 @@ class MainView:
         tk.Label(header, text="CNPJ", font=("Arial", 12, "bold"), width=20, anchor="w").pack(side=tk.LEFT)
         tk.Label(header, text="Celular", font=("Arial", 12, "bold"), width=15, anchor="w").pack(side=tk.LEFT)
         tk.Label(header, text="E-mail", font=("Arial", 12, "bold"), width=30, anchor="w").pack(side=tk.LEFT)
+        tk.Label(header, text="Ações", font=("Arial", 12, "bold"), width=10, anchor="w").pack(
+            side=tk.LEFT)
 
         for record in records:
             record_frame = tk.Frame(self.list_section)
             record_frame.pack(fill=tk.X, pady=5)
 
-            tk.Label(record_frame, text=record[0], font=("Arial", 12), width=25, anchor="w").pack(side=tk.LEFT)
-            tk.Label(record_frame, text=record[1], font=("Arial", 12), width=20, anchor="w").pack(side=tk.LEFT)
-            tk.Label(record_frame, text=record[2], font=("Arial", 12), width=15, anchor="w").pack(side=tk.LEFT)
-            tk.Label(record_frame, text=record[3], font=("Arial", 12), width=30, anchor="w").pack(side=tk.LEFT)
+            tk.Label(record_frame, text=record[1], font=("Arial", 12), width=25, anchor="w").pack(side=tk.LEFT)
+            tk.Label(record_frame, text=record[2], font=("Arial", 12), width=20, anchor="w").pack(side=tk.LEFT)
+            tk.Label(record_frame, text=record[3], font=("Arial", 12), width=15, anchor="w").pack(side=tk.LEFT)
+            tk.Label(record_frame, text=record[4], font=("Arial", 12), width=30, anchor="w").pack(side=tk.LEFT)
+
+            delete_button = tk.Button(record_frame, text="Excluir", font=("Arial", 12), bg="#103a63", fg="#fff",
+                                      command=partial(self.delete_action, record[0]), cursor="hand2", width=15, activebackground="#0d2e47", activeforeground="#fff")
+            delete_button.pack(side=tk.RIGHT, padx=10)
 
             separator = tk.Frame(self.list_section, height=1, bg="#c9c9c9")
             separator.pack(fill=tk.X, pady=5)
+
+    def delete_action(self, fornecedor_id):
+        database.delete_fornecedor(fornecedor_id)
+
+        records = database.find_all_fornecedores()
+        self.update_list_section(records)
 
     def clear_placeholder(self, entry, placeholder, event):
         if entry.get() == placeholder:
