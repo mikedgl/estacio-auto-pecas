@@ -52,3 +52,25 @@ def delete_fornecedor(fornecedor_id):
     cursor.execute("DELETE FROM fornecedores WHERE id = ?", (fornecedor_id,))
     conn.commit()
     conn.close()
+
+def update_fornecedor(fornecedor_id, data):
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('''UPDATE fornecedores
+                      SET razao_social = ?, cnpj = ?, representante = ?, cpf_representante = ?, celular = ?, 
+                          email = ?, endereco = ?
+                      WHERE id = ?''', (*data, fornecedor_id))
+
+    conn.commit()
+    conn.close()
+
+def find_fornecedor_by_id(fornecedor_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('''SELECT * FROM fornecedores WHERE id = ?''', (fornecedor_id,))
+    record = cursor.fetchone()
+
+    conn.close()
+    return record

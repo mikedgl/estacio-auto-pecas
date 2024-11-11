@@ -11,6 +11,8 @@ class MainView:
         self.create_search_section()
         self.create_list_section()
 
+        self.selected_fornecedor_id = None
+
     def create_navbar(self):
         bg_color = "#103a63"
         color = "#fff"
@@ -122,6 +124,14 @@ class MainView:
         records = database.find_all_fornecedores()
         self.update_list_section(records)
 
+    def clear_form_fields(self):
+        placeholders = ["Razão Social", "CNPJ", "Nome do Representante Legal", "CPF do Representante Legal",
+                        "Celular", "E-mail", "Endereço Completo"]
+
+        for entry, placeholder in zip(self.entries, placeholders):
+            entry.delete(0, tk.END)
+            entry.insert(0, placeholder)
+
     def update_list_section(self, records):
         for widget in self.list_section.winfo_children():
             widget.destroy()
@@ -133,8 +143,7 @@ class MainView:
         tk.Label(header, text="CNPJ", font=("Arial", 12, "bold"), width=20, anchor="w").pack(side=tk.LEFT)
         tk.Label(header, text="Celular", font=("Arial", 12, "bold"), width=15, anchor="w").pack(side=tk.LEFT)
         tk.Label(header, text="E-mail", font=("Arial", 12, "bold"), width=30, anchor="w").pack(side=tk.LEFT)
-        tk.Label(header, text="Ações", font=("Arial", 12, "bold"), width=10, anchor="w").pack(
-            side=tk.LEFT)
+        tk.Label(header, text="Ações", font=("Arial", 12, "bold"), width=10, anchor="w").pack(side=tk.LEFT)
 
         for record in records:
             record_frame = tk.Frame(self.list_section)
@@ -145,16 +154,42 @@ class MainView:
             tk.Label(record_frame, text=record[3], font=("Arial", 12), width=15, anchor="w").pack(side=tk.LEFT)
             tk.Label(record_frame, text=record[4], font=("Arial", 12), width=30, anchor="w").pack(side=tk.LEFT)
 
+            update_button = tk.Button(record_frame, text="Atualizar", font=("Arial", 12), bg="#103a63", fg="#fff",
+                                      command=partial(self.update_action, record[0]), cursor="hand2", width=15,
+                                      activebackground="#0d2e47", activeforeground="#fff")
+            update_button.pack(side=tk.RIGHT, padx=10)
+
             delete_button = tk.Button(record_frame, text="Excluir", font=("Arial", 12), bg="#103a63", fg="#fff",
-                                      command=partial(self.delete_action, record[0]), cursor="hand2", width=15, activebackground="#0d2e47", activeforeground="#fff")
+                                      command=partial(self.delete_action, record[0]), cursor="hand2", width=15,
+                                      activebackground="#0d2e47", activeforeground="#fff")
             delete_button.pack(side=tk.RIGHT, padx=10)
+
+            view_button = tk.Button(record_frame, text="Visualizar", font=("Arial", 12), bg="#103a63", fg="#fff",
+                                    command=partial(self.view_action, record[0]), cursor="hand2", width=15,
+                                    activebackground="#0d2e47", activeforeground="#fff")
+            view_button.pack(side=tk.RIGHT, padx=10)
 
             separator = tk.Frame(self.list_section, height=1, bg="#c9c9c9")
             separator.pack(fill=tk.X, pady=5)
 
+    def view_action(self, fornecedor_id):
+        fornecedor = database.find_fornecedor_by_id(fornecedor_id)
+
+        modal = tk.Toplevel(self.root)
+        modal.title("Detalhes do Fornecedor")
+        modal.geometry("400x300")
+
+        labels = ["Razão Social", "CNPJ", "Representante Legal", "CPF do Representante Legal", "Celular", "E-mail",
+                  "Endereço Completo"]
+        for idx, (label_text, value) in enumerate(zip(labels, fornecedor[1:])):
+            label = tk.Label(modal, text=f"{label_text}: {value}", font=("Arial", 12))
+            label.pack(pady=5)
+
+        close_button = tk.Button(modal, text="Fechar", font=("Arial", 12), command=modal.destroy)
+        close_button.pack(pady=10)
+
     def delete_action(self, fornecedor_id):
         database.delete_fornecedor(fornecedor_id)
-
         records = database.find_all_fornecedores()
         self.update_list_section(records)
 
@@ -177,27 +212,27 @@ class MainView:
 
         self.update_list_section(records)
 
-
-    def home_action(self):
-        print("Peças")
-
-    def fornecedores_action(self):
-        print("Fornecedores")
-
-    def fabricantes_action(self):
-        print("Fabricantes")
-
-    def veiculos_action(self):
-        print("Veículos")
-
     def save_action(self):
         data = [entry.get() for entry in self.entries]
-        database.insert_fornecedor(data)
+
+        if self.selected_fornecedor_id:
+            database.update_fornecedor(self.selected_fornecedor_id, data)
+        else:
+            database.insert_fornecedor(data)
 
         records = database.find_all_fornecedores()
         self.update_list_section(records)
 
         self.clear_form_fields()
+
+    def update_action(self, fornecedor_id):
+        fornecedor = database.find_fornecedor_by_id(fornecedor_id)
+
+        for i, entry in enumerate(self.entries):
+            entry.delete(0, tk.END)
+            entry.insert(0, fornecedor[i + 1])
+
+        self.selected_fornecedor_id = fornecedor_id
 
     def cancel_action(self):
         self.clear_form_fields()
@@ -209,3 +244,15 @@ class MainView:
         for entry, placeholder in zip(self.entries, placeholders):
             entry.delete(0, tk.END)
             entry.insert(0, placeholder)
+
+    def home_action(self):
+        pass
+
+    def fornecedores_action(self):
+        pass
+
+    def fabricantes_action(self):
+        pass
+
+    def veiculos_action(self):
+        pass
