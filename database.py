@@ -74,3 +74,23 @@ def find_fornecedor_by_id(fornecedor_id):
 
     conn.close()
     return record
+
+def find_fornecedor_by_cnpj(cnpj):
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM fornecedores WHERE cnpj = ?", (cnpj,))
+    record = cursor.fetchone()
+
+    conn.close()
+    return record
+
+def find_fornecedor_by_cnpj_except(cnpj, fornecedor_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM fornecedores WHERE cnpj = ? AND id != ?", (cnpj, fornecedor_id))
+    record = cursor.fetchone()
+
+    conn.close()
+    return record

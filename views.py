@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.messagebox as messagebox
 from functools import partial
 import database
 
@@ -215,6 +216,22 @@ class MainView:
     def save_action(self):
         data = [entry.get() for entry in self.entries]
 
+        for value in data:
+            if value == "" or value == "Razão Social" or value == "CNPJ" or value == "Nome do Representante Legal" or value == "CPF do Representante Legal" or value == "Celular" or value == "E-mail" or value == "Endereço Completo":
+                tk.messagebox.showwarning("Campos Obrigatórios", "Por favor, preencha todos os campos obrigatórios.")
+                return
+
+        cnpj = data[1]  # O CNPJ está no índice 1 da lista de dados
+        if self.selected_fornecedor_id:
+            existing_fornecedor = database.find_fornecedor_by_cnpj_except(cnpj, self.selected_fornecedor_id)
+        else:
+            existing_fornecedor = database.find_fornecedor_by_cnpj(cnpj)
+
+        if existing_fornecedor:
+            tk.messagebox.showwarning("CNPJ Já Cadastrado",
+                                      "Já existe um fornecedor com esse CNPJ. O salvamento foi impedido.")
+            return
+
         if self.selected_fornecedor_id:
             database.update_fornecedor(self.selected_fornecedor_id, data)
         else:
@@ -224,6 +241,8 @@ class MainView:
         self.update_list_section(records)
 
         self.clear_form_fields()
+
+        self.selected_fornecedor_id = None
 
     def update_action(self, fornecedor_id):
         fornecedor = database.find_fornecedor_by_id(fornecedor_id)
